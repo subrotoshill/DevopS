@@ -1,0 +1,3 @@
+sudo ip add ## show all the IP address in the linux host
+sudo ip link ## List all the interfaces 
+sudo ip route -n ## Show routing info
