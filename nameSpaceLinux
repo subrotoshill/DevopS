@@ -1,3 +1,44 @@
-sudo ip add ## show all the IP address in the linux host
-sudo ip link ## List all the interfaces 
-sudo ip route -n ## Show routing info
+#1. Create Network NameSpace 
+sudo ip netns add Apple
+sudo ip netns add Orange 
+sudo ip netns list # To check the list of namespace
+#2. Create virtual Ethernet pairs 
+sudo ip link set Apple_NS type veth peer name Orange_NS 
+#3. Assign the interface to the namespaces 
+sudo ip link set Apple_NS netns Apple
+sudo ip link set Orange_NS netns Orange
+#4, Change the names of the interface (standerd)
+sudo ip netns exec Apple ip link set Apple_NS name eth0
+sudo ip netns exec Orange ip link set Orange_NS name eth0
+#5. Set IP address to each interface 
+sudo ip netns exec Apple ip addr add 10.10.1.1/24 dev eth0
+sudo ip netns exec Orange ip addr add 10.10.2.1/24 dev eth0
+#6. Bring up the interface up with loopback interface
+sudo ip netns exec Apple ip link set lo up
+sudo ip netns exec Apple ip link set eth0 up
+sudo ip netns exec Orange ip link set lo up
+sudo ip netns exec Orange ip link set eth0 up
+#7. Default route 
+sudo netns exec Apple ip route add default via 10.10.1.1 dev eth0
+sudo netns exec Orange ip route add default via 10.10.2.1 dev eth0
+#8. Test the connection in both directions 
+sudo ip netns exec Apple ping -c 4 10.10.2.1
+sudo ip netns exec Orange ping -c 4 10.10.1.1
+
+
+
+
+
+
+
+#1. Create a linux bridge 
+sudo ip link add dev Fruits_SW bridge
+#2. Fruits_SW is in down state. Lets turn it it UP
+sudo ip link set dev Fruits_SW up
+#3. Create Network NameSpace 
+sudo ip netns add Apple
+sudo ip netns add Orange 
+sudo ip netns list # To check the list of namespace
+#4. Create virtual Ethernet pairs 
+sudo ip link set Apple_NS type veth peer name Apple_BR 
+sudo ip link set Orange_NS type veth peer name Orange_BR
